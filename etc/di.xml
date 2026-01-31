@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Muon\SMSNotification\Api\Data\MessageInterface" type="Muon\SMSNotification\Model\Data\Message"/>
+    <preference for="Muon\SMSNotification\Api\NotifierInterface" type="Muon\SMSNotification\Service\Notifier"/>
+    <preference for="Muon\SMSNotification\Api\SmsTransportInterface" type="Muon\SMSNotification\Model\SmsTransport\ConfigurableTransport"/>
+
+    <type name="Muon\SMSNotification\Model\SmsTransportPool">
+        <arguments>
+            <argument name="transports" xsi:type="array">
+                <item name="twilio" xsi:type="object">Muon\SMSNotification\Model\SmsTransport\Twilio</item>
+                <item name="logger" xsi:type="object">Muon\SMSNotification\Model\SmsTransport\Logger</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Muon\SMSNotification\Model\Config\Source\Transport">
+        <arguments>
+            <argument name="transports" xsi:type="array">
+                <item name="twilio" xsi:type="string">Twilio</item>
+                <item name="logger" xsi:type="string">Log (Development Only)</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Muon\SMSNotification\Observer\SalesOrderPlaceAfterObserver">
+        <arguments>
+            <argument name="messageBuilder" xsi:type="object">Muon\SMSNotification\Model\OrderMessageBuilder</argument>
+        </arguments>
+    </type>
+
+    <type name="Muon\SMSNotification\Observer\CustomerRegisterSuccessObserver">
+        <arguments>
+            <argument name="messageBuilder" xsi:type="object">Muon\SMSNotification\Model\CustomerMessageBuilder</argument>
+        </arguments>
+    </type>
+</config>

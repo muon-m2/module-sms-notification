@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="muon" translate="label" sortOrder="1000">
+            <label>Muon Modules</label>
+        </tab>
+        <section id="sms_notification" translate="label" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>SMS Notification</label>
+            <tab>muon</tab>
+            <resource>Muon_SMSNotification::general</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General Settings</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable SMS Notifications</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <config_path>muon_sms_notification/general/enabled</config_path>
+                </field>
+                <field id="number_attempts" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Number of Attempts</label>
+                    <config_path>muon_sms_notification/general/number_attempts</config_path>
+                </field>
+                <field id="retry_delay" translate="label" type="text" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Retry Delay (seconds)</label>
+                    <config_path>muon_sms_notification/general/retry_delay</config_path>
+                </field>
+                <field id="send_to_phone" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Send To Phone Number</label>
+                    <config_path>muon_sms_notification/general/send_to_phone</config_path>
+                </field>
+                <field id="transport_service" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Transport Service</label>
+                    <source_model>Muon\SMSNotification\Model\Config\Source\Transport</source_model>
+                    <config_path>muon_sms_notification/general/transport_service</config_path>
+                </field>
+                <field id="queue_connection" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Queue Connection</label>
+                    <source_model>Muon\SMSNotification\Model\Config\Source\QueueConnection</source_model>
+                    <config_path>muon_sms_notification/general/queue_connection</config_path>
+                </field>
+            </group>
+            <group id="events" translate="label" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Event Notifications</label>
+                <field id="order_enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Order SMS</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <config_path>muon_sms_notification/events/order_enabled</config_path>
+                </field>
+                <field id="order_template" translate="label" type="textarea" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Order Notification Template</label>
+                    <config_path>muon_sms_notification/events/order_template</config_path>
+                    <depends>
+                        <field id="order_enabled">1</field>
+                    </depends>
+                </field>
+                <field id="customer_register_enabled" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Customer Registration SMS</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <config_path>muon_sms_notification/events/customer_register_enabled</config_path>
+                </field>
+                <field id="customer_register_template" translate="label" type="textarea" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Customer Registration Template</label>
+                    <config_path>muon_sms_notification/events/customer_register_template</config_path>
+                    <depends>
+                        <field id="customer_register_enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="transport" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Twilio Transport Settings</label>
+                <field id="twilio_sid" translate="label" type="obscure" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Twilio SID</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <config_path>muon_sms_notification/transport/twilio_sid</config_path>
+                    <depends>
+                        <field id="muon_sms_notification/general/transport_service">twilio</field>
+                    </depends>
+                </field>
+                <field id="twilio_token" translate="label" type="obscure" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Twilio Token</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <config_path>muon_sms_notification/transport/twilio_token</config_path>
+                    <depends>
+                        <field id="muon_sms_notification/general/transport_service">twilio</field>
+                    </depends>
+                </field>
+                <field id="twilio_from" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Twilio From Phone Number</label>
+                    <config_path>muon_sms_notification/transport/twilio_send_from_phone</config_path>
+                    <depends>
+                        <field id="muon_sms_notification/general/transport_service">twilio</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

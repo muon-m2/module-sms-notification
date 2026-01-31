@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <muon_sms_notification>
+            <general>
+                <enabled>1</enabled>
+                <number_attempts>3</number_attempts>
+                <send_to_phone>+15551234567</send_to_phone>
+                <transport_service>twilio</transport_service>
+                <retry_delay>300</retry_delay>
+            </general>
+            <events>
+                <order_enabled>1</order_enabled>
+                <order_template><![CDATA[Order #{{increment_id}} has been placed. Shipping: {{shipping_description}}. Total: {{order_total}}. Items: {{items}}]]></order_template>
+                <customer_register_enabled>1</customer_register_enabled>
+                <customer_register_template><![CDATA[New customer registered: {{customer_name}} ({{customer_email}}). Store: {{store_name}}]]></customer_register_template>
+            </events>
+            <transport>
+                <twilio_sid>your_twilio_sid</twilio_sid>
+                <twilio_token>your_twilio_token</twilio_token>
+                <twilio_send_from_phone>+15551111111</twilio_send_from_phone>
+            </transport>
+        </muon_sms_notification>
+    </default>
+</config>

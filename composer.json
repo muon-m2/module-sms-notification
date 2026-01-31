@@ -1,0 +1,38 @@
+{
+    "name": "muon/module-sms-notification",
+    "description": "Magento 2 extension for sending automated SMS notifications for key store events (Order Placement, Registration) using Twilio.",
+    "type": "magento2-module",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1",
+        "magento/framework": "103.0.*",
+        "magento/module-customer": "103.0.*",
+        "magento/module-sales": "103.0.*",
+        "twilio/sdk": "^8.10"
+    },
+    "authors": [
+        {
+            "name": "Muon Team",
+            "role": "Developer"
+        }
+    ],
+    "keywords": [
+        "magento2",
+        "sms",
+        "notification",
+        "Twilio",
+        "order-notification",
+        "customer-registration"
+    ],
+    "support": {
+        "issues": "https://github.com/muon-m2/module-sms-notification/issues"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Muon\\SMSNotification\\": ""
+        }
+    }
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
+    <topic name="muon.sms" request="Muon\SMSNotification\Api\Data\MessageInterface" response="string">
+        <handler name="muon.sms.handler" type="Muon\SMSNotification\Model\Queue\Handler\Handler" method="execute"/>
+    </topic>
+    <topic name="muon.sms.amqp" request="Muon\SMSNotification\Api\Data\MessageInterface" response="string">
+        <handler name="muon.sms.amqp.handler" type="Muon\SMSNotification\Model\Queue\Handler\Handler" method="execute"/>
+    </topic>
+</config>
