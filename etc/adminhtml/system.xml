@@ -48,6 +48,11 @@
                     <source_model>Muon\SMSNotification\Model\Config\Source\QueueConnection</source_model>
                     <config_path>muon_sms_notification/general/queue_connection</config_path>
                 </field>
+                <field id="test_sms" translate="label comment" type="button" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Test Configuration</label>
+                    <frontend_model>Muon\SMSNotification\Block\Adminhtml\System\Config\TestSmsButton</frontend_model>
+                    <comment>Sends a test SMS to the configured recipient using the saved transport settings.</comment>
+                </field>
             </group>
             <group id="events" translate="label" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Event Notifications</label>
@@ -99,6 +104,32 @@
                     <config_path>muon_sms_notification/transport/twilio_send_from_phone</config_path>
                     <depends>
                         <field id="muon_sms_notification/general/transport_service">twilio</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="vonage" translate="label" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Vonage Transport Settings</label>
+                <field id="vonage_api_key" translate="label" type="obscure" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Vonage API Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <config_path>muon_sms_notification/vonage/api_key</config_path>
+                    <depends>
+                        <field id="muon_sms_notification/general/transport_service">vonage</field>
+                    </depends>
+                </field>
+                <field id="vonage_api_secret" translate="label" type="obscure" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Vonage API Secret</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <config_path>muon_sms_notification/vonage/api_secret</config_path>
+                    <depends>
+                        <field id="muon_sms_notification/general/transport_service">vonage</field>
+                    </depends>
+                </field>
+                <field id="vonage_from" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Vonage Sender ID / Number</label>
+                    <config_path>muon_sms_notification/vonage/from</config_path>
+                    <depends>
+                        <field id="muon_sms_notification/general/transport_service">vonage</field>
                     </depends>
                 </field>
             </group>

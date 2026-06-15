@@ -1,0 +1,18 @@
+<?php
+/** @var \Muon\SMSNotification\Block\Adminhtml\System\Config\TestSmsButton $block */
+$buttonId = 'muon_sms_test_button';
+?>
+<button type="button" id="<?= /* @noEscape */ $buttonId ?>" class="action-default scalable">
+    <span><?= $block->escapeHtml($block->getData('button_label')) ?></span>
+</button>
+<span id="muon_sms_test_result" class="muon-sms-test-result" style="margin-left:10px;"></span>
+<script type="text/x-magento-init">
+{
+    "#<?= /* @noEscape */ $buttonId ?>": {
+        "Muon_SMSNotification/js/test-sms": {
+            "ajaxUrl": "<?= $block->escapeUrl($block->getData('ajax_url')) ?>",
+            "resultSelector": "#muon_sms_test_result"
+        }
+    }
+}
+</script>

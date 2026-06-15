@@ -8,6 +8,7 @@
         <arguments>
             <argument name="transports" xsi:type="array">
                 <item name="twilio" xsi:type="object">Muon\SMSNotification\Model\SmsTransport\Twilio</item>
+                <item name="vonage" xsi:type="object">Muon\SMSNotification\Model\SmsTransport\Vonage</item>
                 <item name="logger" xsi:type="object">Muon\SMSNotification\Model\SmsTransport\Logger</item>
             </argument>
         </arguments>
@@ -17,6 +18,7 @@
         <arguments>
             <argument name="transports" xsi:type="array">
                 <item name="twilio" xsi:type="string">Twilio</item>
+                <item name="vonage" xsi:type="string">Vonage</item>
                 <item name="logger" xsi:type="string">Log (Development Only)</item>
             </argument>
         </arguments>
