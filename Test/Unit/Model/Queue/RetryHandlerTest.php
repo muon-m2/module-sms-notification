@@ -11,8 +11,8 @@ use Magento\Framework\Serialize\Serializer\Json;
 use Muon\SMSNotification\Model\ResourceModel\RetryQueue as RetryQueueResource;
 use Muon\SMSNotification\Model\RetryQueueFactory;
 use Muon\SMSNotification\Model\RetryQueue;
+use Muon\SMSNotification\Model\Data\Message;
 use Psr\Log\LoggerInterface;
-use Muon\SMSNotification\Api\Data\MessageInterface;
 
 class RetryHandlerTest extends TestCase
 {
@@ -43,56 +43,95 @@ class RetryHandlerTest extends TestCase
         );
     }
 
-    public function testHandleRetrySavesToQueue(): void
+    private function makeMessage(int $attempt, int $storeId): Message
     {
-        $message = $this->createMock(MessageInterface::class);
-        $message->method('getAttemptNumber')->willReturnOnConsecutiveCalls(1, 2, 2);
-        $message->method('getStoreId')->willReturn(1);
-        $message->method('getPhone')->willReturn('+1234567890');
-        $message->method('getMessage')->willReturn('Test message');
+        $message = new Message();
+        $message->setAttemptNumber($attempt);
+        $message->setStoreId($storeId);
+        $message->setPhone('+14155552671');
+        $message->setMessage('Test message');
+
+        return $message;
+    }
+
+    public function testHandleSchedulesRetryWhenAttemptsRemain(): void
+    {
+        $message = $this->makeMessage(1, 1);
 
         $this->configMock->method('getNumberAttempts')->with(1)->willReturn(3);
         $this->configMock->method('getRetryDelay')->with(1)->willReturn(60);
+        $this->serializerMock->method('serialize')->willReturn('{"payload":"json"}');
 
         $retryEntryMock = $this->createMock(RetryQueue::class);
         $this->retryQueueFactoryMock->method('create')->willReturn($retryEntryMock);
 
-        $this->serializerMock->expects($this->once())
-            ->method('serialize')
-            ->with($this->callback(function ($data) {
-                return $data['attempt_number'] === 2 && $data['phone'] === '+1234567890';
-            }))
-            ->willReturn('{"payload": "json"}');
-
         $retryEntryMock->expects($this->once())
             ->method('setData')
-            ->with($this->callback(function ($data) {
-                return $data['message_payload'] === '{"payload": "json"}' && isset($data['scheduled_at']);
+            ->with($this->callback(static function (array $data): bool {
+                return $data['status'] === RetryQueue::STATUS_PENDING
+                    && $data['attempt_number'] === 2
+                    && $data['store_id'] === 1
+                    && $data['message_payload'] === '{"payload":"json"}'
+                    && isset($data['scheduled_at']);
             }))
             ->willReturnSelf();
 
-        $this->retryQueueResourceMock->expects($this->once())
-            ->method('save')
-            ->with($retryEntryMock);
-
-        $message->expects($this->once())->method('setAttemptNumber')->with(2);
+        $this->retryQueueResourceMock->expects($this->once())->method('save')->with($retryEntryMock);
         $this->loggerMock->expects($this->once())->method('info');
 
-        $this->retryHandler->handle($message);
+        $this->retryHandler->handle($message, 'transport error');
+
+        $this->assertSame(2, $message->getAttemptNumber());
     }
 
-    public function testHandleExhausted(): void
+    public function testHandleMovesToDeadLetterWhenExhausted(): void
     {
-        $message = $this->createMock(MessageInterface::class);
-        $message->method('getAttemptNumber')->willReturn(3);
-        $message->method('getStoreId')->willReturn(1);
-        $message->method('getPhone')->willReturn('+1234567890');
+        $message = $this->makeMessage(3, 1);
 
         $this->configMock->method('getNumberAttempts')->with(1)->willReturn(3);
+        $this->serializerMock->method('serialize')->willReturn('{"payload":"dead"}');
 
-        $this->retryQueueFactoryMock->expects($this->never())->method('create');
+        $retryEntryMock = $this->createMock(RetryQueue::class);
+        // Unlike the old behaviour (log-only), exhaustion must persist a dead-letter row.
+        $this->retryQueueFactoryMock->expects($this->once())->method('create')->willReturn($retryEntryMock);
+
+        $retryEntryMock->expects($this->once())
+            ->method('setData')
+            ->with($this->callback(static function (array $data): bool {
+                return $data['status'] === RetryQueue::STATUS_DEAD
+                    && $data['attempt_number'] === 3
+                    && $data['last_error'] === 'permanent failure';
+            }))
+            ->willReturnSelf();
+
+        $this->retryQueueResourceMock->expects($this->once())->method('save')->with($retryEntryMock);
         $this->loggerMock->expects($this->once())->method('critical');
 
-        $this->retryHandler->handle($message);
+        $this->retryHandler->handle($message, 'permanent failure');
+    }
+
+    public function testDeferReQueuesWithoutConsumingBudget(): void
+    {
+        $message = $this->makeMessage(2, 1);
+
+        $this->serializerMock->method('serialize')->willReturn('{"payload":"deferred"}');
+
+        $retryEntryMock = $this->createMock(RetryQueue::class);
+        $this->retryQueueFactoryMock->method('create')->willReturn($retryEntryMock);
+
+        $retryEntryMock->expects($this->once())
+            ->method('setData')
+            ->with($this->callback(static function (array $data): bool {
+                // Deferral keeps the same attempt number (not a failure).
+                return $data['status'] === RetryQueue::STATUS_PENDING && $data['attempt_number'] === 2;
+            }))
+            ->willReturnSelf();
+
+        $this->retryQueueResourceMock->expects($this->once())->method('save')->with($retryEntryMock);
+        $this->loggerMock->expects($this->once())->method('info');
+
+        $this->retryHandler->defer($message, 60);
+
+        $this->assertSame(2, $message->getAttemptNumber());
     }
 }

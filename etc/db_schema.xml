@@ -2,13 +2,24 @@
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/db_schema.xsd">
     <table name="muon_sms_retry_queue" resource="default" engine="innodb" comment="Muon SMS Retry Queue">
         <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="status" length="20" nullable="false" default="pending" comment="Status: pending|processing|failed|dead"/>
+        <column xsi:type="int" name="attempt_number" unsigned="true" nullable="false" default="0" comment="Attempt Number"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" default="0" comment="Store ID"/>
         <column xsi:type="text" name="message_payload" nullable="false" comment="Message Payload (JSON)"/>
+        <column xsi:type="text" name="last_error" nullable="true" comment="Last Error Message"/>
+        <column xsi:type="varchar" name="claim_token" length="64" nullable="true" comment="Cron Claim Token"/>
+        <column xsi:type="timestamp" name="locked_at" nullable="true" comment="Locked At"/>
         <column xsi:type="timestamp" name="scheduled_at" nullable="false" on_update="false" default="CURRENT_TIMESTAMP" comment="Scheduled At"/>
         <column xsi:type="timestamp" name="created_at" nullable="false" on_update="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="true" on_update="true" default="CURRENT_TIMESTAMP" comment="Updated At"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="entity_id"/>
         </constraint>
         <index referenceId="MUON_SMS_RETRY_QUEUE_SCHEDULED_AT" indexType="btree">
+            <column name="scheduled_at"/>
+        </index>
+        <index referenceId="MUON_SMS_RETRY_QUEUE_STATUS_SCHEDULED_AT" indexType="btree">
+            <column name="status"/>
             <column name="scheduled_at"/>
         </index>
     </table>

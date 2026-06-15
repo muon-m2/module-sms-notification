@@ -18,14 +18,36 @@
                 </field>
                 <field id="number_attempts" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Number of Attempts</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
                     <config_path>muon_sms_notification/general/number_attempts</config_path>
                 </field>
                 <field id="retry_delay" translate="label" type="text" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Retry Delay (seconds)</label>
+                    <validate>validate-digits validate-zero-or-greater</validate>
                     <config_path>muon_sms_notification/general/retry_delay</config_path>
+                </field>
+                <field id="retry_batch_size" translate="label" type="text" sortOrder="27" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Retry Batch Size</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                    <comment>Maximum number of retry messages processed per cron run.</comment>
+                    <config_path>muon_sms_notification/general/retry_batch_size</config_path>
+                </field>
+                <field id="rate_limit_per_minute" translate="label comment" type="text" sortOrder="28" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Rate Limit (per minute)</label>
+                    <validate>validate-digits validate-zero-or-greater</validate>
+                    <comment>Max SMS sent per minute per store. 0 = unlimited. Over-limit messages are deferred, not dropped.</comment>
+                    <config_path>muon_sms_notification/general/rate_limit_per_minute</config_path>
+                </field>
+                <field id="max_length" translate="label comment" type="text" sortOrder="29" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Max Message Length</label>
+                    <validate>validate-digits validate-zero-or-greater</validate>
+                    <comment>Truncate outbound messages to this many characters. 0 = unlimited.</comment>
+                    <config_path>muon_sms_notification/general/max_length</config_path>
                 </field>
                 <field id="send_to_phone" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Send To Phone Number</label>
+                    <backend_model>Muon\SMSNotification\Model\Config\Backend\Phone</backend_model>
+                    <comment>Recipient in E.164 format, e.g. +14155552671.</comment>
                     <config_path>muon_sms_notification/general/send_to_phone</config_path>
                 </field>
                 <field id="transport_service" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -37,6 +59,17 @@
                     <label>Queue Connection</label>
                     <source_model>Muon\SMSNotification\Model\Config\Source\QueueConnection</source_model>
                     <config_path>muon_sms_notification/general/queue_connection</config_path>
+                </field>
+                <field id="recipient_mode" translate="label comment" type="select" sortOrder="46" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Notify Recipient</label>
+                    <source_model>Muon\SMSNotification\Model\Config\Source\RecipientMode</source_model>
+                    <comment>Send order/shipment notifications to the admin number or to the customer's order phone.</comment>
+                    <config_path>muon_sms_notification/general/recipient_mode</config_path>
+                </field>
+                <field id="test_sms" translate="label comment" type="button" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Test Configuration</label>
+                    <frontend_model>Muon\SMSNotification\Block\Adminhtml\System\Config\TestSmsButton</frontend_model>
+                    <comment>Sends a test SMS to the configured recipient using the saved transport settings.</comment>
                 </field>
             </group>
             <group id="events" translate="label" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -65,6 +98,18 @@
                         <field id="customer_register_enabled">1</field>
                     </depends>
                 </field>
+                <field id="shipment_enabled" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Shipment SMS</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <config_path>muon_sms_notification/events/shipment_enabled</config_path>
+                </field>
+                <field id="shipment_template" translate="label" type="textarea" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Shipment Notification Template</label>
+                    <config_path>muon_sms_notification/events/shipment_template</config_path>
+                    <depends>
+                        <field id="shipment_enabled">1</field>
+                    </depends>
+                </field>
             </group>
             <group id="transport" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Twilio Transport Settings</label>
@@ -89,6 +134,32 @@
                     <config_path>muon_sms_notification/transport/twilio_send_from_phone</config_path>
                     <depends>
                         <field id="muon_sms_notification/general/transport_service">twilio</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="vonage" translate="label" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Vonage Transport Settings</label>
+                <field id="vonage_api_key" translate="label" type="obscure" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Vonage API Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <config_path>muon_sms_notification/vonage/api_key</config_path>
+                    <depends>
+                        <field id="muon_sms_notification/general/transport_service">vonage</field>
+                    </depends>
+                </field>
+                <field id="vonage_api_secret" translate="label" type="obscure" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Vonage API Secret</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <config_path>muon_sms_notification/vonage/api_secret</config_path>
+                    <depends>
+                        <field id="muon_sms_notification/general/transport_service">vonage</field>
+                    </depends>
+                </field>
+                <field id="vonage_from" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Vonage Sender ID / Number</label>
+                    <config_path>muon_sms_notification/vonage/from</config_path>
+                    <depends>
+                        <field id="muon_sms_notification/general/transport_service">vonage</field>
                     </depends>
                 </field>
             </group>

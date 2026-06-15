@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Muon_SMSNotification::muon"
+             title="Muon"
+             translate="title"
+             module="Muon_SMSNotification"
+             sortOrder="80"
+             resource="Muon_SMSNotification::retry_queue"/>
+        <add id="Muon_SMSNotification::retry_queue"
+             title="SMS Retry Queue"
+             translate="title"
+             module="Muon_SMSNotification"
+             sortOrder="10"
+             parent="Muon_SMSNotification::muon"
+             action="muon_sms/retryQueue/index"
+             resource="Muon_SMSNotification::retry_queue"/>
+    </menu>
+</config>

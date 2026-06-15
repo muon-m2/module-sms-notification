@@ -12,6 +12,11 @@ use Muon\SMSNotification\Model\ResourceModel\RetryQueue as ResourceModel;
  */
 class RetryQueue extends AbstractModel
 {
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_FAILED = 'failed';
+    public const STATUS_DEAD = 'dead';
+
     /**
      * @inheritdoc
      */

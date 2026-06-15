@@ -1,0 +1,24 @@
+{
+    "muon_sms_retry_queue": {
+        "column": {
+            "entity_id": true,
+            "message_payload": true,
+            "scheduled_at": true,
+            "created_at": true,
+            "status": true,
+            "attempt_number": true,
+            "store_id": true,
+            "last_error": true,
+            "claim_token": true,
+            "locked_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "MUON_SMS_RETRY_QUEUE_SCHEDULED_AT": true,
+            "MUON_SMS_RETRY_QUEUE_STATUS_SCHEDULED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

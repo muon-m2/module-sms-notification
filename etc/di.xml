@@ -8,6 +8,7 @@
         <arguments>
             <argument name="transports" xsi:type="array">
                 <item name="twilio" xsi:type="object">Muon\SMSNotification\Model\SmsTransport\Twilio</item>
+                <item name="vonage" xsi:type="object">Muon\SMSNotification\Model\SmsTransport\Vonage</item>
                 <item name="logger" xsi:type="object">Muon\SMSNotification\Model\SmsTransport\Logger</item>
             </argument>
         </arguments>
@@ -17,6 +18,7 @@
         <arguments>
             <argument name="transports" xsi:type="array">
                 <item name="twilio" xsi:type="string">Twilio</item>
+                <item name="vonage" xsi:type="string">Vonage</item>
                 <item name="logger" xsi:type="string">Log (Development Only)</item>
             </argument>
         </arguments>
@@ -33,4 +35,25 @@
             <argument name="messageBuilder" xsi:type="object">Muon\SMSNotification\Model\CustomerMessageBuilder</argument>
         </arguments>
     </type>
+
+    <type name="Muon\SMSNotification\Observer\SalesOrderShipmentSaveAfterObserver">
+        <arguments>
+            <argument name="messageBuilder" xsi:type="object">Muon\SMSNotification\Model\ShipmentMessageBuilder</argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="muon_sms_retry_queue_listing_data_source" xsi:type="string">Muon\SMSNotification\Model\ResourceModel\RetryQueue\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="Muon\SMSNotification\Model\ResourceModel\RetryQueue\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">muon_sms_retry_queue</argument>
+            <argument name="resourceModel" xsi:type="string">Muon\SMSNotification\Model\ResourceModel\RetryQueue</argument>
+        </arguments>
+    </virtualType>
 </config>

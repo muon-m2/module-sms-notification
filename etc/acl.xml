@@ -11,6 +11,7 @@
                         </resource>
                     </resource>
                 </resource>
+                <resource id="Muon_SMSNotification::retry_queue" title="SMS Retry Queue" translate="title" sortOrder="80"/>
             </resource>
         </resources>
     </acl>

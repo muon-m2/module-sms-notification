@@ -6,4 +6,7 @@
     <event name="customer_register_success">
         <observer name="muon_sms_notification_customer_register_success_observer" instance="Muon\SMSNotification\Observer\CustomerRegisterSuccessObserver"/>
     </event>
+    <event name="sales_order_shipment_save_after">
+        <observer name="muon_sms_notification_sales_order_shipment_save_after_observer" instance="Muon\SMSNotification\Observer\SalesOrderShipmentSaveAfterObserver"/>
+    </event>
 </config>
