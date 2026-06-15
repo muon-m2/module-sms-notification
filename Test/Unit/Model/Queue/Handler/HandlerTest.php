@@ -54,16 +54,19 @@ class HandlerTest extends TestCase
         $this->handler->execute($message);
     }
 
-    public function testExecuteInvalidPhone(): void
+    public function testExecuteInvalidPhoneIsPermanentAndNotRetried(): void
     {
         $message = $this->createMock(MessageInterface::class);
         $message->method('getPhone')->willReturn('invalid');
+        $message->method('getAttemptNumber')->willReturn(1);
+        $message->method('getStoreId')->willReturn(1);
 
         $this->phoneValidatorMock->method('isValid')->with('invalid')->willReturn(false);
 
         $this->smsTransportMock->expects($this->never())->method('send');
-        $this->loggerMock->expects($this->once())->method('error');
-        $this->retryHandlerMock->expects($this->once())->method('handle')->with($message);
+        // Invalid phone is a permanent failure: it must NOT be scheduled for retry.
+        $this->retryHandlerMock->expects($this->never())->method('handle');
+        $this->loggerMock->expects($this->once())->method('warning');
 
         $this->handler->execute($message);
     }
@@ -80,6 +83,48 @@ class HandlerTest extends TestCase
         $this->smsTransportMock->method('send')->willThrowException(new SmsTransportException('Failed'));
 
         $this->retryHandlerMock->expects($this->once())->method('handle')->with($message);
+
+        $this->handler->execute($message);
+    }
+
+    public function testExecuteRetriesOnAnyThrowable(): void
+    {
+        $message = $this->createMock(MessageInterface::class);
+        $message->method('getPhone')->willReturn('+1234567890');
+        $message->method('getMessage')->willReturn('Test Message');
+        $message->method('getStoreId')->willReturn(1);
+
+        $this->phoneValidatorMock->method('isValid')->willReturn(true);
+
+        // A non-SmsTransportException (e.g. network/SDK error or misconfiguration) must
+        // still be caught and routed to retry rather than escaping the consumer.
+        $this->smsTransportMock->method('send')
+            ->willThrowException(new \RuntimeException('Unexpected SDK failure'));
+
+        $this->retryHandlerMock->expects($this->once())->method('handle')->with($message);
+
+        $this->handler->execute($message);
+    }
+
+    public function testLoggerContextMasksPhoneAndOmitsBody(): void
+    {
+        $message = $this->createMock(MessageInterface::class);
+        $message->method('getPhone')->willReturn('+14155552671');
+        $message->method('getMessage')->willReturn('Sensitive body');
+        $message->method('getStoreId')->willReturn(1);
+        $message->method('getAttemptNumber')->willReturn(1);
+
+        $this->phoneValidatorMock->method('isValid')->willReturn(true);
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with(
+                'SMS sent',
+                $this->callback(static function (array $context): bool {
+                    return $context['phone'] === '********2671'
+                        && !array_key_exists('message', $context);
+                })
+            );
 
         $this->handler->execute($message);
     }

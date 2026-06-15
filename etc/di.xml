@@ -33,4 +33,19 @@
             <argument name="messageBuilder" xsi:type="object">Muon\SMSNotification\Model\CustomerMessageBuilder</argument>
         </arguments>
     </type>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="muon_sms_retry_queue_listing_data_source" xsi:type="string">Muon\SMSNotification\Model\ResourceModel\RetryQueue\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="Muon\SMSNotification\Model\ResourceModel\RetryQueue\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">muon_sms_retry_queue</argument>
+            <argument name="resourceModel" xsi:type="string">Muon\SMSNotification\Model\ResourceModel\RetryQueue</argument>
+        </arguments>
+    </virtualType>
 </config>

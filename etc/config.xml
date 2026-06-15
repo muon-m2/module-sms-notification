@@ -9,6 +9,7 @@
                 <send_to_phone>+15551234567</send_to_phone>
                 <transport_service>twilio</transport_service>
                 <retry_delay>300</retry_delay>
+                <retry_batch_size>100</retry_batch_size>
             </general>
             <events>
                 <order_enabled>1</order_enabled>

@@ -18,14 +18,24 @@
                 </field>
                 <field id="number_attempts" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Number of Attempts</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
                     <config_path>muon_sms_notification/general/number_attempts</config_path>
                 </field>
                 <field id="retry_delay" translate="label" type="text" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Retry Delay (seconds)</label>
+                    <validate>validate-digits validate-zero-or-greater</validate>
                     <config_path>muon_sms_notification/general/retry_delay</config_path>
+                </field>
+                <field id="retry_batch_size" translate="label" type="text" sortOrder="27" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Retry Batch Size</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                    <comment>Maximum number of retry messages processed per cron run.</comment>
+                    <config_path>muon_sms_notification/general/retry_batch_size</config_path>
                 </field>
                 <field id="send_to_phone" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Send To Phone Number</label>
+                    <backend_model>Muon\SMSNotification\Model\Config\Backend\Phone</backend_model>
+                    <comment>Recipient in E.164 format, e.g. +14155552671.</comment>
                     <config_path>muon_sms_notification/general/send_to_phone</config_path>
                 </field>
                 <field id="transport_service" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">

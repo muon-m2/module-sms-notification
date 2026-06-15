@@ -40,7 +40,7 @@ class Notifier implements NotifierInterface
     public function sendSMS(string $phone, string $message, ?int $storeId = null): void
     {
         if (!$this->phoneValidator->isValid($phone)) {
-            $this->logger->error((string)__('Invalid phone number format: %1', $phone));
+            $this->logger->error('SMS not sent: invalid recipient phone number format');
 
             return;
         }

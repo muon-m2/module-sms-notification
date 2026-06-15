@@ -9,6 +9,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Muon\SMSNotification\Api\NotifierInterface;
 use Muon\SMSNotification\Api\MessageBuilderInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Observes the `sales_order_place_after` event.
@@ -21,18 +22,23 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
      * @param NotifierInterface       $notifier       The notifier instance for sending notifications.
      * @param Config                  $config         The configuration settings for the service.
      * @param MessageBuilderInterface $messageBuilder The message builder instance for constructing messages.
+     * @param LoggerInterface         $logger         Logger for swallowed notification failures.
      *
      * @return void
      */
     public function __construct(
         private readonly NotifierInterface $notifier,
         private readonly Config $config,
-        private readonly MessageBuilderInterface $messageBuilder
+        private readonly MessageBuilderInterface $messageBuilder,
+        private readonly LoggerInterface $logger
     ) {
     }
 
     /**
      * Observer for sales_order_place_after.
+     *
+     * SMS notification is best-effort: any failure here is logged and swallowed so it can
+     * never interrupt or roll back order placement.
      *
      * @param \Magento\Framework\Event\Observer $observer
      *
@@ -40,12 +46,20 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
      */
     public function execute(Observer $observer): void
     {
-        /** @var \Magento\Sales\Api\Data\OrderInterface $order */
-        $order = $observer->getEvent()->getData('order');
-        if (!$this->config->isOrderEnabled((int)$order->getStoreId())) {
-            return;
+        try {
+            /** @var \Magento\Sales\Api\Data\OrderInterface|null $order */
+            $order = $observer->getEvent()->getData('order');
+            if ($order === null || !$this->config->isOrderEnabled((int)$order->getStoreId())) {
+                return;
+            }
+            $storeId = (int)$order->getStoreId();
+            $this->notifier->sendSMS(
+                $this->config->getSendToPhone($storeId),
+                $this->messageBuilder->getMessage($order),
+                $storeId
+            );
+        } catch (\Throwable $e) {
+            $this->logger->error('SMS order notification failed: ' . $e->getMessage());
         }
-        $phone = $this->config->getSendToPhone($order->getStoreId());
-        $this->notifier->sendSMS($phone, $this->messageBuilder->getMessage($order), (int)$order->getStoreId());
     }
 }

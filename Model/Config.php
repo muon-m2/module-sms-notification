@@ -12,7 +12,10 @@ class Config
     public const XML_SMS_NOTIFICATION_ENABLED = 'muon_sms_notification/general/enabled';
     public const XML_SMS_NOTIFICATION_NUMBER_ATTEMPTS = 'muon_sms_notification/general/number_attempts';
     public const XML_SMS_NOTIFICATION_RETRY_DELAY = 'muon_sms_notification/general/retry_delay';
+    public const XML_SMS_NOTIFICATION_RETRY_BATCH_SIZE = 'muon_sms_notification/general/retry_batch_size';
     public const XML_SMS_NOTIFICATION_QUEUE_CONNECTION = 'muon_sms_notification/general/queue_connection';
+
+    public const DEFAULT_RETRY_BATCH_SIZE = 100;
     public const XML_SMS_NOTIFICATION_SEND_TO_PHONE = 'muon_sms_notification/general/send_to_phone';
     public const XML_SMS_NOTIFICATION_TRANSPORT_SERVICE = 'muon_sms_notification/general/transport_service';
     public const XML_SMS_NOTIFICATION_ORDER_ENABLED = 'muon_sms_notification/events/order_enabled';
@@ -68,6 +71,24 @@ class Config
             ScopeInterface::SCOPE_STORE,
             $storeId
         );
+    }
+
+    /**
+     * Retrieves the maximum number of retry rows a single cron run may claim.
+     *
+     * @param int|null $storeId The ID of the store scope. If null, the default scope is used.
+     *
+     * @return int The configured batch size, falling back to a safe default when unset/invalid.
+     */
+    public function getRetryBatchSize(?int $storeId = null): int
+    {
+        $size = (int)$this->scopeConfig->getValue(
+            self::XML_SMS_NOTIFICATION_RETRY_BATCH_SIZE,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        return $size > 0 ? $size : self::DEFAULT_RETRY_BATCH_SIZE;
     }
 
     /**
