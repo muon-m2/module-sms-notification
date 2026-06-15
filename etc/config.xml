@@ -12,12 +12,15 @@
                 <retry_batch_size>100</retry_batch_size>
                 <rate_limit_per_minute>0</rate_limit_per_minute>
                 <max_length>0</max_length>
+                <recipient_mode>admin</recipient_mode>
             </general>
             <events>
                 <order_enabled>1</order_enabled>
                 <order_template><![CDATA[Order #{{increment_id}} has been placed. Shipping: {{shipping_description}}. Total: {{order_total}}. Items: {{items}}]]></order_template>
                 <customer_register_enabled>1</customer_register_enabled>
                 <customer_register_template><![CDATA[New customer registered: {{customer_name}} ({{customer_email}}). Store: {{store_name}}]]></customer_register_template>
+                <shipment_enabled>0</shipment_enabled>
+                <shipment_template><![CDATA[Your order #{{increment_id}} has shipped. Tracking: {{tracking}}. {{store_name}}]]></shipment_template>
             </events>
             <transport>
                 <twilio_sid>your_twilio_sid</twilio_sid>

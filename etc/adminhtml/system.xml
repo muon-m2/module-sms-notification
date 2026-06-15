@@ -60,6 +60,12 @@
                     <source_model>Muon\SMSNotification\Model\Config\Source\QueueConnection</source_model>
                     <config_path>muon_sms_notification/general/queue_connection</config_path>
                 </field>
+                <field id="recipient_mode" translate="label comment" type="select" sortOrder="46" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Notify Recipient</label>
+                    <source_model>Muon\SMSNotification\Model\Config\Source\RecipientMode</source_model>
+                    <comment>Send order/shipment notifications to the admin number or to the customer's order phone.</comment>
+                    <config_path>muon_sms_notification/general/recipient_mode</config_path>
+                </field>
                 <field id="test_sms" translate="label comment" type="button" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Test Configuration</label>
                     <frontend_model>Muon\SMSNotification\Block\Adminhtml\System\Config\TestSmsButton</frontend_model>
@@ -90,6 +96,18 @@
                     <config_path>muon_sms_notification/events/customer_register_template</config_path>
                     <depends>
                         <field id="customer_register_enabled">1</field>
+                    </depends>
+                </field>
+                <field id="shipment_enabled" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Shipment SMS</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <config_path>muon_sms_notification/events/shipment_enabled</config_path>
+                </field>
+                <field id="shipment_template" translate="label" type="textarea" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Shipment Notification Template</label>
+                    <config_path>muon_sms_notification/events/shipment_template</config_path>
+                    <depends>
+                        <field id="shipment_enabled">1</field>
                     </depends>
                 </field>
             </group>

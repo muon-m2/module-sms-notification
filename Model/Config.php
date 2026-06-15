@@ -24,6 +24,9 @@ class Config
     public const XML_SMS_NOTIFICATION_ORDER_TEMPLATE = 'muon_sms_notification/events/order_template';
     public const XML_SMS_NOTIFICATION_CUSTOMER_REGISTER_ENABLED = 'muon_sms_notification/events/customer_register_enabled';
     public const XML_SMS_NOTIFICATION_CUSTOMER_REGISTER_TEMPLATE = 'muon_sms_notification/events/customer_register_template';
+    public const XML_SMS_NOTIFICATION_RECIPIENT_MODE = 'muon_sms_notification/general/recipient_mode';
+    public const XML_SMS_NOTIFICATION_SHIPMENT_ENABLED = 'muon_sms_notification/events/shipment_enabled';
+    public const XML_SMS_NOTIFICATION_SHIPMENT_TEMPLATE = 'muon_sms_notification/events/shipment_template';
 
     public function __construct(private readonly ScopeConfigInterface $scopeConfig) { }
 
@@ -235,4 +238,48 @@ class Config
         );
     }
 
+    /**
+     * Recipient mode for order/shipment notifications ("admin" or "customer").
+     *
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getRecipientMode(?int $storeId = null): string
+    {
+        return (string)($this->scopeConfig->getValue(
+            self::XML_SMS_NOTIFICATION_RECIPIENT_MODE,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?: 'admin');
+    }
+
+    /**
+     * Whether shipment SMS notifications are enabled.
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function isShipmentEnabled(?int $storeId = null): bool
+    {
+        return $this->isEnabled($storeId) && $this->scopeConfig->isSetFlag(
+            self::XML_SMS_NOTIFICATION_SHIPMENT_ENABLED,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Shipment notification template.
+     *
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getShipmentTemplate(?int $storeId = null): string
+    {
+        return (string)$this->scopeConfig->getValue(
+            self::XML_SMS_NOTIFICATION_SHIPMENT_TEMPLATE,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
 }

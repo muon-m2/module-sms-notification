@@ -36,6 +36,12 @@
         </arguments>
     </type>
 
+    <type name="Muon\SMSNotification\Observer\SalesOrderShipmentSaveAfterObserver">
+        <arguments>
+            <argument name="messageBuilder" xsi:type="object">Muon\SMSNotification\Model\ShipmentMessageBuilder</argument>
+        </arguments>
+    </type>
+
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">

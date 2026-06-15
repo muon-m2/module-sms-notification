@@ -9,6 +9,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Muon\SMSNotification\Api\NotifierInterface;
 use Muon\SMSNotification\Api\MessageBuilderInterface;
+use Muon\SMSNotification\Model\RecipientResolver;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,10 +20,11 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
     /**
      * Constructor method.
      *
-     * @param NotifierInterface       $notifier       The notifier instance for sending notifications.
-     * @param Config                  $config         The configuration settings for the service.
-     * @param MessageBuilderInterface $messageBuilder The message builder instance for constructing messages.
-     * @param LoggerInterface         $logger         Logger for swallowed notification failures.
+     * @param NotifierInterface       $notifier          The notifier instance for sending notifications.
+     * @param Config                  $config            The configuration settings for the service.
+     * @param MessageBuilderInterface $messageBuilder    The message builder instance for constructing messages.
+     * @param RecipientResolver       $recipientResolver Resolves the admin/customer recipient.
+     * @param LoggerInterface         $logger            Logger for swallowed notification failures.
      *
      * @return void
      */
@@ -30,6 +32,7 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
         private readonly NotifierInterface $notifier,
         private readonly Config $config,
         private readonly MessageBuilderInterface $messageBuilder,
+        private readonly RecipientResolver $recipientResolver,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -54,7 +57,7 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
             }
             $storeId = (int)$order->getStoreId();
             $this->notifier->sendSMS(
-                $this->config->getSendToPhone($storeId),
+                $this->recipientResolver->resolveForOrder($order),
                 $this->messageBuilder->getMessage($order),
                 $storeId
             );
