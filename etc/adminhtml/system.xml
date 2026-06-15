@@ -32,6 +32,18 @@
                     <comment>Maximum number of retry messages processed per cron run.</comment>
                     <config_path>muon_sms_notification/general/retry_batch_size</config_path>
                 </field>
+                <field id="rate_limit_per_minute" translate="label comment" type="text" sortOrder="28" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Rate Limit (per minute)</label>
+                    <validate>validate-digits validate-zero-or-greater</validate>
+                    <comment>Max SMS sent per minute per store. 0 = unlimited. Over-limit messages are deferred, not dropped.</comment>
+                    <config_path>muon_sms_notification/general/rate_limit_per_minute</config_path>
+                </field>
+                <field id="max_length" translate="label comment" type="text" sortOrder="29" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Max Message Length</label>
+                    <validate>validate-digits validate-zero-or-greater</validate>
+                    <comment>Truncate outbound messages to this many characters. 0 = unlimited.</comment>
+                    <config_path>muon_sms_notification/general/max_length</config_path>
+                </field>
                 <field id="send_to_phone" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Send To Phone Number</label>
                     <backend_model>Muon\SMSNotification\Model\Config\Backend\Phone</backend_model>

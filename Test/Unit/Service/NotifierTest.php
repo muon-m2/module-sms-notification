@@ -11,6 +11,7 @@ use Muon\SMSNotification\Api\Data\MessageInterfaceFactory;
 use Muon\SMSNotification\Api\Data\MessageInterface;
 use Muon\SMSNotification\Model\PhoneValidator;
 use Muon\SMSNotification\Model\Config;
+use Muon\SMSNotification\Model\MessageFormatter;
 use Psr\Log\LoggerInterface;
 
 class NotifierTest extends TestCase
@@ -38,8 +39,27 @@ class NotifierTest extends TestCase
             $this->messageFactoryMock,
             $this->phoneValidatorMock,
             $this->configMock,
-            $this->loggerMock
+            $this->loggerMock,
+            new MessageFormatter($this->configMock)
         );
+    }
+
+    public function testSendSMSTruncatesLongMessageBeforePublishing(): void
+    {
+        $this->phoneValidatorMock->method('isValid')->willReturn(true);
+        $this->configMock->method('getMaxLength')->willReturn(10);
+
+        $messageObjMock = $this->createMock(MessageInterface::class);
+        $messageObjMock->method('setPhone')->willReturnSelf();
+        $messageObjMock->method('setAttemptNumber')->willReturnSelf();
+        $messageObjMock->method('setStoreId')->willReturnSelf();
+        $this->messageFactoryMock->method('create')->willReturn($messageObjMock);
+        $this->configMock->method('getQueueConnection')->willReturn('db');
+
+        // 9 chars + ellipsis = the 10-char cap.
+        $messageObjMock->expects($this->once())->method('setMessage')->with('This is a…')->willReturnSelf();
+
+        $this->notifier->sendSMS('+14155550000', 'This is a very long message', 1);
     }
 
     public function testSendSMSSuccess(): void

@@ -109,4 +109,29 @@ class RetryHandlerTest extends TestCase
 
         $this->retryHandler->handle($message, 'permanent failure');
     }
+
+    public function testDeferReQueuesWithoutConsumingBudget(): void
+    {
+        $message = $this->makeMessage(2, 1);
+
+        $this->serializerMock->method('serialize')->willReturn('{"payload":"deferred"}');
+
+        $retryEntryMock = $this->createMock(RetryQueue::class);
+        $this->retryQueueFactoryMock->method('create')->willReturn($retryEntryMock);
+
+        $retryEntryMock->expects($this->once())
+            ->method('setData')
+            ->with($this->callback(static function (array $data): bool {
+                // Deferral keeps the same attempt number (not a failure).
+                return $data['status'] === RetryQueue::STATUS_PENDING && $data['attempt_number'] === 2;
+            }))
+            ->willReturnSelf();
+
+        $this->retryQueueResourceMock->expects($this->once())->method('save')->with($retryEntryMock);
+        $this->loggerMock->expects($this->once())->method('info');
+
+        $this->retryHandler->defer($message, 60);
+
+        $this->assertSame(2, $message->getAttemptNumber());
+    }
 }

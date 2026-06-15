@@ -10,14 +10,21 @@ use Muon\SMSNotification\Api\Data\MessageInterface;
 use Muon\SMSNotification\Api\SmsTransportInterface;
 use Muon\SMSNotification\Model\PhoneValidator;
 use Muon\SMSNotification\Model\Queue\RetryHandler;
+use Muon\SMSNotification\Model\RateLimiter;
 
 class Handler
 {
+    /**
+     * Delay (seconds) a rate-limited message is deferred before re-attempting.
+     */
+    private const RATE_LIMIT_DEFER_SECONDS = 60;
+
     public function __construct(
         private readonly SmsTransportInterface $smsTransport,
         private readonly RetryHandler $retryHandler,
         private readonly LoggerInterface $logger,
-        private readonly PhoneValidator $phoneValidator
+        private readonly PhoneValidator $phoneValidator,
+        private readonly RateLimiter $rateLimiter
     ) {
     }
 
@@ -30,6 +37,13 @@ class Handler
                 'SMS dropped: invalid phone number format',
                 $this->getLoggerContext($message)
             );
+            return;
+        }
+
+        // Rate limiting is not a failure: defer without consuming the retry budget.
+        if (!$this->rateLimiter->tryAcquire($message->getStoreId())) {
+            $this->logger->info('SMS rate limited; deferring', $this->getLoggerContext($message));
+            $this->retryHandler->defer($message, self::RATE_LIMIT_DEFER_SECONDS);
             return;
         }
 

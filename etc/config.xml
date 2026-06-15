@@ -10,6 +10,8 @@
                 <transport_service>twilio</transport_service>
                 <retry_delay>300</retry_delay>
                 <retry_batch_size>100</retry_batch_size>
+                <rate_limit_per_minute>0</rate_limit_per_minute>
+                <max_length>0</max_length>
             </general>
             <events>
                 <order_enabled>1</order_enabled>

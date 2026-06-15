@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Muon\SMSNotification\Service;
 
 use Muon\SMSNotification\Model\Config;
+use Muon\SMSNotification\Model\MessageFormatter;
 use Muon\SMSNotification\Model\PhoneValidator;
 use Muon\SMSNotification\Model\Data\Message;
 use Muon\SMSNotification\Api\NotifierInterface;
@@ -17,11 +18,12 @@ class Notifier implements NotifierInterface
     /**
      * Constructor method.
      *
-     * @param PublisherInterface      $publisher      An instance of the publisher interface for handling messages.
-     * @param MessageInterfaceFactory $messageFactory Factory responsible for creating message instances.
-     * @param PhoneValidator          $phoneValidator Validates phone numbers for compliance with required formats.
-     * @param Config                  $config         The configuration instance providing necessary settings.
-     * @param LoggerInterface         $logger         Logger instance for handling logging operations.
+     * @param PublisherInterface      $publisher        An instance of the publisher interface for handling messages.
+     * @param MessageInterfaceFactory $messageFactory   Factory responsible for creating message instances.
+     * @param PhoneValidator          $phoneValidator   Validates phone numbers for compliance with required formats.
+     * @param Config                  $config           The configuration instance providing necessary settings.
+     * @param LoggerInterface         $logger           Logger instance for handling logging operations.
+     * @param MessageFormatter        $messageFormatter Applies length limits and reports segment counts.
      *
      * @return void
      */
@@ -30,7 +32,8 @@ class Notifier implements NotifierInterface
         private readonly MessageInterfaceFactory $messageFactory,
         private readonly PhoneValidator $phoneValidator,
         private readonly Config $config,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly MessageFormatter $messageFormatter
     ) {
     }
 
@@ -44,6 +47,13 @@ class Notifier implements NotifierInterface
 
             return;
         }
+
+        $message = $this->messageFormatter->format($message, $storeId);
+        $this->logger->info(
+            'SMS queued for delivery',
+            ['segments' => $this->messageFormatter->segmentCount($message), 'store_id' => (int)$storeId]
+        );
+
         $messageObj = $this->messageFactory->create();
         $messageObj->setPhone($phone);
         $messageObj->setMessage($message);

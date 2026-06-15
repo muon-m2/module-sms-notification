@@ -82,6 +82,27 @@ class RetryHandler
     }
 
     /**
+     * Re-queue a message for a short delay without consuming the retry budget.
+     *
+     * Used for non-failure deferrals (e.g. rate limiting): the attempt number is preserved so
+     * the message keeps its full retry budget for genuine delivery failures.
+     *
+     * @param MessageInterface $message
+     * @param int $seconds
+     * @return void
+     */
+    public function defer(MessageInterface $message, int $seconds): void
+    {
+        $scheduledAt = date('Y-m-d H:i:s', time() + max(1, $seconds));
+        $this->persist($message, RetryQueue::STATUS_PENDING, null, $scheduledAt);
+
+        $this->logger->info(
+            (string)__('SMS deferred for %1s (rate limited)', $seconds),
+            ['store_id' => $message->getStoreId()]
+        );
+    }
+
+    /**
      * Persist a retry-queue row with the given status.
      *
      * @param MessageInterface $message
